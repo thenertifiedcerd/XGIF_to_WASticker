@@ -54,7 +54,7 @@ function run(command, args, options = {}) {
 async function convertToSticker(url, outputPath) {
   const directory = path.dirname(outputPath);
   const inputPath = path.join(directory, 'source.%(ext)s');
-  await run('yt-dlp', [
+  const ytDlpArgs = [
     '--no-playlist',
     '--no-part',
     '--max-filesize',
@@ -64,7 +64,11 @@ async function convertToSticker(url, outputPath) {
     '-o',
     inputPath,
     url
-  ]);
+  ];
+  if (process.env.YTDLP_COOKIES_FILE) {
+    ytDlpArgs.splice(0, 0, '--cookies', process.env.YTDLP_COOKIES_FILE);
+  }
+  await run('yt-dlp', ytDlpArgs);
 
   const entries = await fs.readdir(directory);
   const source = entries.find((entry) => entry.startsWith('source.'));
